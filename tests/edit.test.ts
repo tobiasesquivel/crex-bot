@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { TEXT_LIMIT, TITLE_LIMIT } from "../src/announce.js";
+import { COMBINED_LIMIT, TEXT_LIMIT, TITLE_LIMIT } from "../src/announce.js";
 import { parseMessageLink, runEdit, validateEdit } from "../src/edit.js";
 import type { EditDeps } from "../src/edit.js";
 
@@ -95,6 +95,28 @@ describe("validación de /editar", () => {
     expect(result.ok).toBe(false);
     if (!result.ok) expect(result.error).toContain(String(TITLE_LIMIT));
     expect(d.applyEdit).not.toHaveBeenCalled();
+  });
+
+  it("rechaza total de más de 6000 caracteres con el límite en el error", async () => {
+    const d = deps({ input: { messageLink: LINK, title: "Aviso", text: "x".repeat(COMBINED_LIMIT) } });
+    const result = await runEdit(d);
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.error).toContain(String(COMBINED_LIMIT));
+    expect(d.applyEdit).not.toHaveBeenCalled();
+  });
+});
+
+describe("formato actual", () => {
+  it("pasa título grande, negritas, listas, mención de canal y /link tal cual", async () => {
+    const text = "# Cómo funciona\n\n**Paso 1:** haz esto\n- punto uno\n- punto dos\n\nMira <#123> y usa /link";
+    const d = deps({ input: { messageLink: LINK, title: "Aviso", text } });
+    const result = await runEdit(d);
+    expect(result.ok).toBe(true);
+    expect(d.applyEdit).toHaveBeenCalledWith("222", "333", {
+      content: undefined,
+      embeds: [{ title: "Aviso", description: text }],
+      allowedMentions: { parse: [] },
+    });
   });
 });
 

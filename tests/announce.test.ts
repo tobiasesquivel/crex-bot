@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { TEXT_LIMIT, TITLE_LIMIT, runAnnounce, validateAnnounce } from "../src/announce.js";
+import { COMBINED_LIMIT, TEXT_LIMIT, TITLE_LIMIT, runAnnounce, validateAnnounce } from "../src/announce.js";
 import type { AnnounceDeps, AnnounceLogEntry } from "../src/announce.js";
 
 const STAFF = "role-crex-staff";
@@ -47,6 +47,28 @@ describe("validación de /anunciar", () => {
     expect(result.ok).toBe(false);
     if (!result.ok) expect(result.error).toContain(String(TITLE_LIMIT));
     expect(d.publish).not.toHaveBeenCalled();
+  });
+
+  it("rechaza total de más de 6000 caracteres con el límite en el error", async () => {
+    const d = deps({ input: { title: "Novedad", text: "x".repeat(COMBINED_LIMIT) } });
+    const result = await runAnnounce(d);
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.error).toContain(String(COMBINED_LIMIT));
+    expect(d.publish).not.toHaveBeenCalled();
+  });
+});
+
+describe("formato actual", () => {
+  it("pasa título grande, negritas, listas, mención de canal y /link tal cual", async () => {
+    const text = "# Cómo funciona\n\n**Paso 1:** haz esto\n- punto uno\n- punto dos\n\nMira <#123> y usa /link";
+    const d = deps({ input: { title: "Novedad", text } });
+    const result = await runAnnounce(d);
+    expect(result.ok).toBe(true);
+    expect(d.publish).toHaveBeenCalledWith({
+      content: undefined,
+      embeds: [{ title: "Novedad", description: text }],
+      allowedMentions: { parse: [] },
+    });
   });
 });
 
