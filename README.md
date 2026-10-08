@@ -4,7 +4,7 @@ Servicio continuo con `/anunciar` y `/editar`. Solo rol Crex Staff. Token solo p
 
 ## Requisitos
 
-- Node 22.20.5 (ver `.nvmrc`)
+- Node 22.20.0 (ver `.nvmrc`)
 - Servidor de prueba: `GUILD_ID`, aplicación con `DISCORD_CLIENT_ID`
 - Rol `Crex Staff` en el servidor (o `STAFF_ROLE_NAME`)
 - Permisos del bot en canales de anuncio: ver, enviar, enlaces embebidos
@@ -44,11 +44,11 @@ Responde en privado si se publicó o corrigió. Publica con identidad `crex`. So
 
 El registro guarda canal, mensaje, autor y fecha en `announcements.log` (`ANNOUNCE_LOG_PATH`). Si falla el registro, igual confirma y avisa en consola.
 
-El servicio expone `GET /` con texto `ok` en el puerto `PORT` (por defecto 3000) para el monitoreo externo.
+El servicio expone `GET /` en el puerto `PORT` (por defecto 3000). Responde `200 ok` solo cuando Discord está listo; durante una desconexión responde `503 unavailable`. Si falla el login, sale con código `1` para que el hosting lo reinicie.
 
 ## Hosting y monitoreo
 
-Ver `docs/hosting-railway.md`. Resumen: Railway con el `Dockerfile`, disco para el registro, secretos como variables, y alerta externa sobre `GET /`.
+Ver `docs/hosting-railway.md`. Railway debe usar un plan pago, reinicio `Always`, `Serverless` desactivado, disco `/data`, secretos como variables y alerta externa sobre `GET /`.
 
 ## Pendiente manual (lo hace una persona)
 

@@ -96,12 +96,16 @@ export async function startBot(): Promise<void> {
   const config = loadConfig();
   const port = Number(process.env["PORT"] ?? "3000");
 
-  createServer((_req, res) => {
-    res.writeHead(200, { "content-type": "text/plain" });
-    res.end("ok");
-  }).listen(port);
-
   const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+
+  createServer((_req, res) => {
+    const ready = client.isReady();
+    res.writeHead(ready ? 200 : 503, {
+      "content-type": "text/plain",
+      "cache-control": "no-store",
+    });
+    res.end(ready ? "ok" : "unavailable");
+  }).listen(port, "0.0.0.0");
 
   client.on(Events.InteractionCreate, async (interaction) => {
     if (!interaction.isChatInputCommand()) return;
@@ -207,8 +211,8 @@ export async function startBot(): Promise<void> {
 
   try {
     await client.login(config.token);
-  } catch (error) {
-    console.error("No pude conectar con Discord. Revisa el token.", error);
+  } catch {
+    console.error("No pude conectar con Discord. Revisa el token y la conexión.");
+    process.exit(1);
   }
-  setInterval(() => {}, 60_000);
 }
