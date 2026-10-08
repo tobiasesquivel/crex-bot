@@ -5,11 +5,13 @@ export const COMBINED_LIMIT = 6000;
 export interface AnnounceInput {
   title: string;
   text: string;
+  mentionEveryone?: boolean;
 }
 
 export interface AnnouncePayload {
+  content?: string;
   embeds: Array<{ title: string; description: string }>;
-  allowedMentions: { parse: [] };
+  allowedMentions: { parse: Array<"everyone"> };
 }
 
 export interface AnnounceLogEntry {
@@ -67,8 +69,9 @@ export async function runAnnounce(deps: AnnounceDeps): Promise<AnnounceOutcome> 
     return { ok: false, error: errors.join(" ") };
   }
   const payload: AnnouncePayload = {
+    content: deps.input.mentionEveryone ? "@everyone" : undefined,
     embeds: [{ title: deps.input.title, description: deps.input.text }],
-    allowedMentions: { parse: [] },
+    allowedMentions: deps.input.mentionEveryone ? { parse: ["everyone"] } : { parse: [] },
   };
   let sent;
   try {

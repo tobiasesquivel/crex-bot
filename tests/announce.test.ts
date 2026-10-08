@@ -78,6 +78,7 @@ describe("publicación", () => {
     const result = await runAnnounce(d);
     expect(result).toEqual({ ok: true, channelId: "chan-1", messageId: "msg-1" });
     expect(d.publish).toHaveBeenCalledWith({
+      content: undefined,
       embeds: [{ title: "Novedad", description: "Hola #general" }],
       allowedMentions: { parse: [] },
     });
@@ -87,5 +88,16 @@ describe("publicación", () => {
     expect(entry?.messageId).toBe("msg-1");
     expect(entry?.authorId).toBe("author-1");
     expect(typeof entry?.date).toBe("string");
+  });
+
+  it("avisa a todos solo si se pide", async () => {
+    const d = deps({ input: { title: "Novedad", text: "Hola", mentionEveryone: true } });
+    const result = await runAnnounce(d);
+    expect(result).toEqual({ ok: true, channelId: "chan-1", messageId: "msg-1" });
+    expect(d.publish).toHaveBeenCalledWith({
+      content: "@everyone",
+      embeds: [{ title: "Novedad", description: "Hola" }],
+      allowedMentions: { parse: ["everyone"] },
+    });
   });
 });

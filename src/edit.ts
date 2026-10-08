@@ -4,6 +4,7 @@ export interface EditInput {
   messageLink: string;
   title: string;
   text: string;
+  mentionEveryone?: boolean;
 }
 
 export interface EditDeps {
@@ -94,8 +95,9 @@ export async function runEdit(deps: EditDeps): Promise<EditOutcome> {
     };
   }
   const payload: AnnouncePayload = {
+    content: deps.input.mentionEveryone ? "@everyone" : undefined,
     embeds: [{ title: deps.input.title, description: deps.input.text }],
-    allowedMentions: { parse: [] },
+    allowedMentions: deps.input.mentionEveryone ? { parse: ["everyone"] } : { parse: [] },
   };
   try {
     await deps.applyEdit(ids.channelId, ids.messageId, payload);

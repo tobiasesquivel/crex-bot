@@ -30,6 +30,9 @@ export const announceCommand = new SlashCommandBuilder()
   .addStringOption((option) =>
     option.setName("texto").setDescription("Texto del anuncio (hasta 2000 caracteres)").setRequired(true),
   )
+  .addBooleanOption((option) =>
+    option.setName("todos").setDescription("Avisa a todo el servidor (@everyone)").setRequired(false),
+  )
   .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages)
   .setDMPermission(false);
 
@@ -44,6 +47,9 @@ export const editCommand = new SlashCommandBuilder()
   )
   .addStringOption((option) =>
     option.setName("texto").setDescription("Texto nuevo (hasta 2000 caracteres)").setRequired(true),
+  )
+  .addBooleanOption((option) =>
+    option.setName("todos").setDescription("Avisa a todo el servidor (@everyone)").setRequired(false),
   )
   .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages)
   .setDMPermission(false);
@@ -113,6 +119,7 @@ export async function startBot(): Promise<void> {
       const channel = interaction.options.getChannel("canal", true);
       const title = interaction.options.getString("titulo", true);
       const text = interaction.options.getString("texto", true);
+      const mentionEveryone = interaction.options.getBoolean("todos") ?? false;
 
       const check = staffCheck(guild, interaction.member?.roles, config.staffRoleName);
       if (!check.ok) {
@@ -125,7 +132,7 @@ export async function startBot(): Promise<void> {
         memberRoleIds: check.memberRoleIds,
         staffRoleId: check.staffRoleId,
         authorId: interaction.user.id,
-        input: { title, text },
+        input: { title, text, mentionEveryone },
         publish: async (payload) => {
           if (!("send" in channel) || typeof channel.send !== "function") {
             throw new Error("Canal inválido. Elige un canal de texto del servidor.");
@@ -150,6 +157,7 @@ export async function startBot(): Promise<void> {
       const messageLink = interaction.options.getString("enlace", true);
       const title = interaction.options.getString("titulo", true);
       const text = interaction.options.getString("texto", true);
+      const mentionEveryone = interaction.options.getBoolean("todos") ?? false;
 
       const check = staffCheck(guild, interaction.member?.roles, config.staffRoleName);
       if (!check.ok) {
@@ -172,7 +180,7 @@ export async function startBot(): Promise<void> {
         staffRoleId: check.staffRoleId,
         authorId: interaction.user.id,
         botId,
-        input: { messageLink, title, text },
+        input: { messageLink, title, text, mentionEveryone },
         fetchMessage: async (channelId, messageId) => {
           const target = await fetchTargetMessage(guild, channelId, messageId);
           return target ? { authorId: target.author.id } : null;

@@ -105,6 +105,7 @@ describe("edición", () => {
     expect(result).toEqual({ ok: true, channelId: "222", messageId: "333" });
     expect(d.applyEdit).toHaveBeenCalledOnce();
     expect(d.applyEdit).toHaveBeenCalledWith("222", "333", {
+      content: undefined,
       embeds: [{ title: "Aviso", description: "Hola #general" }],
       allowedMentions: { parse: [] },
     });
@@ -114,6 +115,19 @@ describe("edición", () => {
     expect(entry?.messageId).toBe("333");
     expect(entry?.authorId).toBe("author-1");
     expect(typeof entry?.date).toBe("string");
+  });
+
+  it("avisa a todos al editar solo si se pide", async () => {
+    const d = deps({
+      input: { messageLink: LINK, title: "Aviso", text: "Hola", mentionEveryone: true },
+    });
+    const result = await runEdit(d);
+    expect(result).toEqual({ ok: true, channelId: "222", messageId: "333" });
+    expect(d.applyEdit).toHaveBeenCalledWith("222", "333", {
+      content: "@everyone",
+      embeds: [{ title: "Aviso", description: "Hola" }],
+      allowedMentions: { parse: ["everyone"] },
+    });
   });
 
   it("devuelve error claro si editar falla y no registra", async () => {
