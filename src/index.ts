@@ -3,6 +3,7 @@ import {
   Client,
   Events,
   GatewayIntentBits,
+  PermissionFlagsBits,
   SlashCommandBuilder,
 } from "discord.js";
 import { runAnnounce } from "./announce.js";
@@ -25,6 +26,7 @@ export const announceCommand = new SlashCommandBuilder()
   .addStringOption((option) =>
     option.setName("texto").setDescription("Texto del anuncio (hasta 2000 caracteres)").setRequired(true),
   )
+  .setDefaultMemberPermissions(PermissionFlagsBits.ManageMessages)
   .setDMPermission(false);
 
 export async function startBot(): Promise<void> {

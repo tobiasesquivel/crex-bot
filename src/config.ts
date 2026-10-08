@@ -1,3 +1,22 @@
+import { readFileSync } from "node:fs";
+
+function loadDotEnv(): void {
+  let raw: string;
+  try {
+    raw = readFileSync(".env", "utf8");
+  } catch {
+    return;
+  }
+  for (const line of raw.split(/\r?\n/)) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith("#") || !trimmed.includes("=")) continue;
+    const key = trimmed.slice(0, trimmed.indexOf("=")).trim();
+    const value = trimmed.slice(trimmed.indexOf("=") + 1).trim();
+    if (key && !(key in process.env)) process.env[key] = value;
+  }
+}
+
+loadDotEnv();
 export interface BotConfig {
   token: string;
   clientId: string;
