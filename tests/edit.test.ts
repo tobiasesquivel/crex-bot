@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { TEXT_LIMIT } from "../src/announce.js";
+import { TEXT_LIMIT, TITLE_LIMIT } from "../src/announce.js";
 import { parseMessageLink, runEdit, validateEdit } from "../src/edit.js";
 import type { EditDeps } from "../src/edit.js";
 
@@ -86,6 +86,14 @@ describe("validación de /editar", () => {
     const result = await runEdit(d);
     expect(result.ok).toBe(false);
     if (!result.ok) expect(result.error).toContain(String(TEXT_LIMIT));
+    expect(d.applyEdit).not.toHaveBeenCalled();
+  });
+
+  it("rechaza título de más de 256 caracteres con el límite en el error", async () => {
+    const d = deps({ input: { messageLink: LINK, title: "x".repeat(TITLE_LIMIT + 1), text: "Hola" } });
+    const result = await runEdit(d);
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.error).toContain(String(TITLE_LIMIT));
     expect(d.applyEdit).not.toHaveBeenCalled();
   });
 });

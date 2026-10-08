@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { TEXT_LIMIT, runAnnounce, validateAnnounce } from "../src/announce.js";
+import { TEXT_LIMIT, TITLE_LIMIT, runAnnounce, validateAnnounce } from "../src/announce.js";
 import type { AnnounceDeps, AnnounceLogEntry } from "../src/announce.js";
 
 const STAFF = "role-crex-staff";
@@ -38,6 +38,14 @@ describe("validación de /anunciar", () => {
     const result = await runAnnounce(d);
     expect(result.ok).toBe(false);
     if (!result.ok) expect(result.error).toContain(String(TEXT_LIMIT));
+    expect(d.publish).not.toHaveBeenCalled();
+  });
+
+  it("rechaza título de más de 256 caracteres con el límite en el error", async () => {
+    const d = deps({ input: { title: "x".repeat(TITLE_LIMIT + 1), text: "Hola" } });
+    const result = await runAnnounce(d);
+    expect(result.ok).toBe(false);
+    if (!result.ok) expect(result.error).toContain(String(TITLE_LIMIT));
     expect(d.publish).not.toHaveBeenCalled();
   });
 });

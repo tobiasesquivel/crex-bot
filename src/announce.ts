@@ -1,4 +1,6 @@
 export const TEXT_LIMIT = 2000;
+export const TITLE_LIMIT = 256;
+export const COMBINED_LIMIT = 6000;
 
 export interface AnnounceInput {
   title: string;
@@ -35,12 +37,22 @@ export function validateAnnounce(input: AnnounceInput): string[] {
   if (input.title.trim().length === 0) {
     errors.push("Falta el título. Escribe un título corto.");
   }
+  if (input.title.length > TITLE_LIMIT) {
+    errors.push(
+      `Título muy largo (${input.title.length}/${TITLE_LIMIT} caracteres). Acórtalo antes de enviar.`,
+    );
+  }
   if (input.text.trim().length === 0) {
     errors.push("Falta el texto. Escribe el anuncio.");
   }
   if (input.text.length > TEXT_LIMIT) {
     errors.push(
       `Texto muy largo (${input.text.length}/${TEXT_LIMIT} caracteres). Acórtalo antes de enviar.`,
+    );
+  }
+  if (input.title.length + input.text.length > COMBINED_LIMIT) {
+    errors.push(
+      `Anuncio muy largo en total (${input.title.length + input.text.length}/${COMBINED_LIMIT} caracteres). Acórtalo antes de enviar.`,
     );
   }
   return errors;

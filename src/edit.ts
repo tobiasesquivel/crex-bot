@@ -1,4 +1,4 @@
-import { TEXT_LIMIT, type AnnounceLogEntry, type AnnouncePayload } from "./announce.js";
+import { COMBINED_LIMIT, TEXT_LIMIT, TITLE_LIMIT, type AnnounceLogEntry, type AnnouncePayload } from "./announce.js";
 
 export interface EditInput {
   messageLink: string;
@@ -39,12 +39,22 @@ export function validateEdit(input: EditInput): string[] {
   if (input.title.trim().length === 0) {
     errors.push("Falta el título. Escribe un título corto.");
   }
+  if (input.title.length > TITLE_LIMIT) {
+    errors.push(
+      `Título muy largo (${input.title.length}/${TITLE_LIMIT} caracteres). Acórtalo antes de enviar.`,
+    );
+  }
   if (input.text.trim().length === 0) {
     errors.push("Falta el texto. Escribe el anuncio.");
   }
   if (input.text.length > TEXT_LIMIT) {
     errors.push(
       `Texto muy largo (${input.text.length}/${TEXT_LIMIT} caracteres). Acórtalo antes de enviar.`,
+    );
+  }
+  if (input.title.length + input.text.length > COMBINED_LIMIT) {
+    errors.push(
+      `Anuncio muy largo en total (${input.title.length + input.text.length}/${COMBINED_LIMIT} caracteres). Acórtalo antes de enviar.`,
     );
   }
   return errors;

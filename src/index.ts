@@ -7,6 +7,7 @@ import {
   SlashCommandBuilder,
 } from "discord.js";
 import type { Guild, GuildMemberRoleManager, Message } from "discord.js";
+import { createServer } from "node:http";
 import { runAnnounce } from "./announce.js";
 import type { AnnouncePayload } from "./announce.js";
 import { runEdit } from "./edit.js";
@@ -87,6 +88,13 @@ async function editPayload(
 
 export async function startBot(): Promise<void> {
   const config = loadConfig();
+  const port = Number(process.env["PORT"] ?? "3000");
+
+  createServer((_req, res) => {
+    res.writeHead(200, { "content-type": "text/plain" });
+    res.end("ok");
+  }).listen(port);
+
   const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
   client.on(Events.InteractionCreate, async (interaction) => {
@@ -189,5 +197,10 @@ export async function startBot(): Promise<void> {
     console.log(`crex listo como ${client.user?.tag}`);
   });
 
-  await client.login(config.token);
+  try {
+    await client.login(config.token);
+  } catch (error) {
+    console.error("No pude conectar con Discord. Revisa el token.", error);
+  }
+  setInterval(() => {}, 60_000);
 }

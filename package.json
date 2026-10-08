@@ -5,7 +5,7 @@
   "description": "Bot crex: /anunciar y /editar solo para rol Crex Staff",
   "type": "module",
   "engines": {
-    "node": ">=22"
+    "node": "22.20.5"
   },
   "scripts": {
     "dev": "tsx src/main.ts",
